@@ -97,7 +97,7 @@ void printf_main(void)
 
         // Parse width.precision between % and type indicator.
         *to++ = '%';
-        while (*f && strchr("-+# '0", *f) && (to-toybuf)<10) *to++ = *f++;
+        while (stridx("-+# '0", *f) != -1 && (to-toybuf)<10) *to++ = *f++;
         for (;;) {
           if (chrstart(&f, '*')) {
             if (*arg) wp[i] = atolx(*arg++);
@@ -111,7 +111,6 @@ void printf_main(void)
         aa = *arg ? *arg++ : "";
 
         // Output %esc using parsed format string
-        if (!c) error_exit("bad %s", *toys.optargs);
         if (c == 'b') {
           while (*aa)
             putchar(chrstart(&aa, '\\') ? handle_slash(&aa, 1) : *aa++);
@@ -119,7 +118,7 @@ void printf_main(void)
           continue;
         } else if (c == 'c') printf(toybuf, wp[0], wp[1], *aa);
         else if (c == 's') printf(toybuf, wp[0], wp[1], aa);
-        else if (strchr("diouxX", c)) {
+        else if (stridx("diouxX", c) != -1) {
           long long ll;
 
           if (*aa == '\'' || *aa == '"') ll = aa[1];
@@ -127,7 +126,7 @@ void printf_main(void)
 
           sprintf(to, "*.*ll%c", c);
           printf(toybuf, wp[0], wp[1], ll);
-        } else if (strchr("feEgG", c)) {
+        } else if (stridx("feEgG", c) != -1) {
           long double ld = strtold(aa, &end);
 
           sprintf(to, "*.*L%c", c);
